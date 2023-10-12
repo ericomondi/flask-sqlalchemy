@@ -36,14 +36,41 @@ def index():
 
 
 # get products
-@app.route("/products",methods=["GET"])
+@app.route("/products",methods=["GET","POST"])
 def products():
-    # Use the query method to retrieve all records from the Users table
+    if request.method == "POST":
+        product_name = request.form["product_name"]
+        buying_price = float(request.form["buying_price"])
+        selling_price = float(request.form["selling_price"])
+        stock_quantity = int(request.form["stock_quantity"])
+
+        # Create a new product instance with the form data
+        new_product = Products(product_name=product_name, buying_price=buying_price,selling_price=selling_price,stock_quantity=stock_quantity)
+
+        # Add the new product to the database session
+        db.session.add(new_product)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return redirect(url_for("products"))
+
+    # Use the query method to retrieve all records from the products table
     products = Products.query.all()
 
-    # You can now iterate over the 'users' list to access the records
+    # You can now iterate over the 'products' list to access the records
     data = [product for product in products]    
     return render_template("products.html", products=data )
+
+# get sales
+@app.route("/sales",methods=["GET"])
+def sales():
+    # Use the query method to retrieve all records from the sales table
+    sales = Sales.query.all()
+
+    # You can now iterate over the 'sales' list to access the records
+    data = [sale for sale in sales]    
+    return render_template("sales.html", sales=data )
    
 
 app.run(debug=True)

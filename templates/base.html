@@ -307,12 +307,12 @@
                 <a class="nav-link" href="{{ url_for('sales') }}">Sales</a>
               </li>
               <li class="nav-item nav-link-register">
-                <a class="nav-link" href="{{ url_for('register') }}"
+                <a class="nav-link" href="{{ url_for('products') }}"
                   >Register</a
                 >
               </li>
               <li class="nav-item nav-link-login">
-                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                <a class="nav-link" href="{{ url_for('products') }}">Login</a>
               </li>
               <li class="nav-item dropdown">
                 <a
@@ -328,19 +328,19 @@
                   class="dropdown-menu {% if 'user_id' not in session %}user-logged-out{% endif %}"
                 >
                   <li>
-                    <a class="dropdown-item" href="{{ url_for('rem_stock') }}"
+                    <a class="dropdown-item" href="{{ url_for('products') }}"
                       >Stock</a
                     >
                   </li>
                   <li>
-                    <a class="dropdown-item" href="{{ url_for('dashboard') }}"
+                    <a class="dropdown-item" href="{{ url_for('products') }}"
                       >Dashboard</a
                     >
                   </li>
                   <li>
                     <a
                       class="dropdown-item nav-link-logout"
-                      href="{{ url_for('logout') }}"
+                      href="{{ url_for('products') }}"
                       >Logout</a
                     >
                   </li>
