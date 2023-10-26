@@ -1,11 +1,20 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import DateTime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import LoginManager, login_user
+
+
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:2345@localhost:5432/duka"
-
 db = SQLAlchemy(app)
+
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
+
+login_manager = LoginManager(app)
+login_manager.login_view = "login" 
 
 class Products(db.Model):
     __tablename__ = 'products'
@@ -28,6 +37,7 @@ class Users(db.Model):
     full_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
+    status = db.Column(db.String(10), default="active")  # Custom account status field
 
 # index route
 @app.route("/")
@@ -72,5 +82,56 @@ def sales():
     data = [sale for sale in sales]    
     return render_template("sales.html", sales=data )
    
+def register_user(full_name, email, password):
+    new_user = Users(full_name=full_name, email=email, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+
+
+def authenticate_user(email, password):
+    user = Users.query.filter_by(email=email).first()
+    
+    if user and user.password == password:
+        # User exists and password matches (plaintext comparison)
+        return user
+    else:
+        # User doesn't exist or password is incorrect
+        return None
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = authenticate_user(email, password)
+        if user:
+            login_user(user)
+            flash("Success")
+            return redirect(url_for('products'))  # Redirect to the dashboard page after login
+        else:
+            # Handle authentication failure
+            flash("Invalid logins")
+            return render_template('login.html', error="Invalid email or password")
+    return render_template('login.html')
+
+# @app.route('/login', methods=['GET', 'POST'])
+# def login(email, password):
+#     user = Users.query.filter_by(email=email).first()
+#     if user and check_password_hash(user.password_hash, password):
+#         if user.status == "active":
+#             login_user(user)
+#             flash("Success")
+#             return redirect(url_for('products')) 
+#         elif user.status == "inactive":
+#             flash("Account is inactive")
+#             return redirect(url_for('login.html'))
+#     else:
+#         flash("Account is inactive")
+#         return redirect(url_for('login.html'))
+
 
 app.run(debug=True)
