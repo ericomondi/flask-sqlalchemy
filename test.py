@@ -1,9 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import DateTime
-from flask_login import LoginManager,login_required, UserMixin,login_user
+from flask_login import LoginManager,login_required
 from flask import session
-
 
 
 app = Flask(__name__)
@@ -18,9 +17,6 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
-
-def is_authenticated(self):
-        return True
 
 class Products(db.Model):
     __tablename__ = 'products'
@@ -37,7 +33,7 @@ class Sales(db.Model):
     quantity = db.Column(db.Numeric(precision=14, scale=2))
     created_at = db.Column(DateTime, default=db.func.current_timestamp())
 
-class Users(db.Model, UserMixin):
+class Users(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255), nullable=False)
@@ -52,7 +48,7 @@ def index():
 
 # get products
 @app.route("/products",methods=["GET","POST"])
-# @login_required
+@login_required
 def products():
     if request.method == "POST":
         product_name = request.form["product_name"]
@@ -133,7 +129,9 @@ def login():
 
         if user and authenticate_user(email, password):
             # Successfully logged in, store user info in the session
+            print("session about to be set")
             session['user_id'] = user.user_id
+            print("session set success")
             flash("Logged in successfully!")
             return redirect(url_for("products"))
         else:
@@ -147,5 +145,4 @@ def logout():
     session.pop('user_id', None)
     flash("Logged out successfully")
     return redirect(url_for("login"))
-
 

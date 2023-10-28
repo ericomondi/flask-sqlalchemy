@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     {% extends "base.html" %}
-    <title>{% block title %}Sales{% endblock %}</title>
-  </head>
-  <body>
+    {% block title %}Sales{% endblock %}
+  
     {% block content %}
 
     <h3 class="text-left">Sales Table</h3>
@@ -25,7 +20,7 @@
         {% for sale in sales %}
         <tr>
           <td>{{ sale.id }}</td>
-          <td>{{ sale.product_id }}</td>
+          <td>{{ sale.p_id }}</td>
           <td>{{ sale.quantity }}</td>
           <td>{{ sale.created_at }}</td>
         </tr>
@@ -70,5 +65,4 @@
     </div>
 
     {% endblock %}
-  </body>
-</html>
+  
