@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_required, UserMixin, login_user, current_user
+from flask_login import LoginManager, login_required, UserMixin, login_user, current_user,logout_user
 from sqlalchemy import DateTime
-
+from werkzeug.security import generate_password_hash,check_password_hash
 
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 print("Registering user_loader function")
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(id):
     active = Users.query.get(int(id))
     print("loader:", active)
     return active
@@ -60,17 +60,6 @@ class Users(db.Model, UserMixin):
         return str(self.id)
 
 
-def authenticate_user(email, password):
-    user = Users.query.filter_by(email=email).first()
-    
-    if user and user.password == password:
-        # User exists and password matches (plaintext comparison)
-        return user
-    else:
-        # User doesn't exist or password is incorrect
-        return None
-
-
 
 # index route
 @app.route("/")
@@ -81,6 +70,7 @@ def index():
 
 # get products
 @app.route("/products",methods=["GET","POST"])
+@login_required
 def products():
     if request.method == "POST":
         product_name = request.form["product_name"]
@@ -111,6 +101,7 @@ def products():
 
 # get sales
 @app.route("/sales",methods=["GET"])
+@login_required
 def sales():
     
     print("User ID in the session (sales route):", session.get('user_id'))
@@ -133,7 +124,7 @@ def register():
         full_name = request.form['full_name']
         password = request.form['password']
         email = request.form['email']
-
+        hashed_pass=generate_password_hash(password)
         # Email Validation
         user = Users.query.filter_by(email=email).first()
         if user:
@@ -141,7 +132,7 @@ def register():
         elif not password or not email:
             flash("Please fill all the inputs")
         else:
-            new_user = Users(full_name=full_name, email=email, password=password)
+            new_user = Users(full_name=full_name, email=email, password=hashed_pass)
             db.session.add(new_user)
             db.session.commit()
             flash("You have registered successfully!")
@@ -157,10 +148,13 @@ def login():
         password = request.form['password']
         user = Users.query.filter_by(email=email).first()
         print("User to be verify:", user)
-        if user and authenticate_user(email, password):
+        # remember = True if request.form.get('remember') else False
+
+        if user and check_password_hash(user.password, password):
             # Successfully logged in, store user info in the session
             print("User authenticated:", user)
             session['user_id'] = user.id
+            login_user(user)
             print("Session:", session['user_id'])
             flash("Logged in successfully!")
             active_user=current_user
@@ -174,11 +168,12 @@ def login():
 
 @app.route("/logout")
 def logout():
+    # user=current_user
+    logout_user()
     # Remove the user_id from the session to log out
     session.pop('user_id', None)
     flash("Logged out successfully")
-    return redirect(url_for("login"))
-
+    return redirect(url_for("index"))
 
 
 if __name__ == '__main__':
