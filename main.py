@@ -1,15 +1,24 @@
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
+from flask_login import LoginManager, login_required, UserMixin, login_user, current_user
 from sqlalchemy import DateTime
-from flask_login import LoginManager,login_required, UserMixin,login_user,current_user
-from flask import render_template, request, redirect, url_for, flash,session
 
 
 
 app = Flask(__name__)
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+print("Registering user_loader function")
+@login_manager.user_loader
+def load_user(user_id):
+    active = Users.query.get(int(id))
+    print("loader:", active)
+    return active
+
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:2345@localhost:5432/my_duka"
 db = SQLAlchemy(app)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = 'eric'
 
 
 
@@ -30,25 +39,25 @@ class Sales(db.Model):
     created_at = db.Column(DateTime, default=db.func.current_timestamp())
 
 
-class Users(db.Model,UserMixin):
+class Users(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
 
-# Implement the required methods
-def is_authenticated(self):
-    return True
+    # Implement the required methods
+    def is_authenticated(self):
+        return True
 
-def is_active(self):
-    return True
+    def is_active(self):
+        return True
 
-def is_anonymous(self):
-    return False
+    def is_anonymous(self):
+        return False
 
-def get_id(self):
-    return str(self.id)
+    def get_id(self):
+        return str(self.id)
 
 
 def authenticate_user(email, password):
@@ -61,14 +70,6 @@ def authenticate_user(email, password):
         # User doesn't exist or password is incorrect
         return None
 
-
-login_manager = LoginManager(app)
-login_manager.login_view = "login" 
-
-# Define the user_loader function
-@login_manager.user_loader
-def load_user(id):
-    return Users.query.get(int(id))
 
 
 # index route
@@ -110,12 +111,14 @@ def products():
 
 # get sales
 @app.route("/sales",methods=["GET"])
-@login_required
 def sales():
+    
+    print("User ID in the session (sales route):", session.get('user_id'))
 
     user = current_user
     # Use the query method to retrieve all records from the sales table
     sales = Sales.query.all()
+    print("Current User:", user)
 
     # You can now iterate over the 'sales' list to access the records
     data = [sale for sale in sales]    
@@ -152,13 +155,16 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
         user = Users.query.filter_by(email=email).first()
-
+        print("User to be verify:", user)
         if user and authenticate_user(email, password):
             # Successfully logged in, store user info in the session
+            print("User authenticated:", user)
             session['user_id'] = user.id
+            print("Session:", session['user_id'])
             flash("Logged in successfully!")
+            active_user=current_user
+            print("current user(login):", active_user)
             return redirect(url_for("products"))
         else:
             flash("Invalid email or password")
@@ -176,4 +182,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
