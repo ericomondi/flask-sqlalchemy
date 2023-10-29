@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% extends "base.html" %}
+    <title>{% block title %}Add Sale{% endblock %}</title>
+  </head>
+  <body>
+    {% block content %}
+    <!-- add sale form -->
+    <div class="container mt-4">
+      <h1>Add Sale</h1>
+      <form id="sales_form" method="post" action="/add-sale">
+        <!-- ... other form elements ... -->
+        <!-- Product ID -->
+        <div class="mb-3">
+          <label for="product_id" class="form-label">Product ID</label>
+          <select
+            name="product_id"
+            type="number"
+            id="product_id"
+            class="form-control"
+            required
+          >
+            {% for product in products %}
+            <option value="{{ product.id }}" data-price="{{ product.selling_price }}">
+              {{ product.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Quantity -->
+        <div class="mb-3">
+          <label for="quantity" class="form-label">Quantity</label>
+          <input
+            type="number"
+            class="form-control"
+            id="quantity"
+            name="quantity"
+            required
+          />
+        </div>
+
+        <!-- Total Amount -->
+        <div class="mb-3">
+          <label for="amount" class="form-label">Total Amount</label>
+          <input type="text" class="form-control" id="amount" name="amount" />
+        </div>
+
+        <!-- Add Sale Button -->
+        <button type="submit" class="btn btn-primary" id="addSaleButton">
+          Add Sale
+        </button>
+        <a href="{{ url_for('add_sale') }}" class="btn btn-primary" style="background-color: green; border: green;"
+          >Get Receipt</a
+        >
+      </form>
+    </div>
+
+    <!-- Include this JavaScript within your HTML file, preferably just before the closing </body> tag -->
+    <script>
+      // Get references to the necessary elements
+      const quantityInput = document.getElementById("quantity");
+      const productSelect = document.getElementById("product_id");
+      const totalAmountInput = document.getElementById("amount");
+
+      // Add an event listener to the quantity input
+      quantityInput.addEventListener("input", updateTotalAmount);
+
+      // Function to update the total amount
+      function updateTotalAmount() {
+        const selectedOption =
+          productSelect.options[productSelect.selectedIndex];
+        const productPrice = parseFloat(
+          selectedOption.getAttribute("data-price")
+        );
+        const quantity = parseFloat(quantityInput.value);
+        const totalAmount = productPrice * quantity;
+
+        // Update the total amount input field
+        totalAmountInput.value = totalAmount.toFixed(2);
+      }
+    </script>
+
+    {% endblock %}
+  </body>
+</html>

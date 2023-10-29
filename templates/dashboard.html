@@ -1,8 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% extends "base.html" %}
+    <title>{% block title %}Dashboard{% endblock %}</title>  
+    {% block content %} 
+    <style>
+      
+    </style>
+    
+  </head>
+  <body>
+       
+      <div class="row">
+        <div class="col-6" >
 
-{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+          <canvas id="pie-chart" width="800" height="450"></canvas>
 
-{% block content %}
+      </div>
+        <div class="col-6" >
+          
+            <canvas id="bar-chart" width="600" height="450"></canvas>
 
-<p>Active user:{{user.full_name}}</p>
-{% endblock %}
+        </div>
+        
+        <div class="col-12">
+            <canvas id="line-chart" width="800" height="450"></canvas>
+        </div>
+          
+    <script>
+    
+      var p_names = JSON.parse('{{ p_names | tojson | safe }}');
+      var p_sales = JSON.parse('{{ p_sales | tojson | safe }}');
+    
+            // Bar chart
+    new Chart(document.getElementById("bar-chart"), {
+        type: 'bar',
+        data: {
+          labels: p_names,
+          datasets: [
+            {
+              label: "Top Sales",
+              backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+              data: p_sales
+            }
+          ]
+        },
+        options: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: 'Top five sales in the bussiness'
+          }
+        }
+    });
+
+    new Chart(document.getElementById("pie-chart"), {
+        type: 'pie',
+        data: {
+          labels: p_names,
+          datasets: [{
+            label: "Top five sales",
+            backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+            data: p_sales
+          }]
+        },
+        options: {
+          title: {
+            display: true,
+            text: 'Top five sales of the bussiness'
+          }
+        }
+    });
+
+
+    // Add this script to hide the footer when the page loads
+    window.addEventListener('load', function() {
+                var footer = document.querySelector('footer');
+                if (footer) {
+                  footer.style.display = 'none';
+                }
+              });
+        </script>
+        
+              
+            
+        {% endblock%}
+        
+       
+  </body>
+</html>
+
+
+
+
+
+

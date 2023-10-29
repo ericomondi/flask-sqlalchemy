@@ -149,3 +149,11 @@ def logout():
     return redirect(url_for("login"))
 
 
+top_sales = (
+        db.session.query(Sales,Products.name, func.sum(Sales.quantity * Products.selling_price).label('total_sales'))
+        .join(Products, Sales.p_id == Products.id)
+        .group_by(Sales.id, Products.name)
+        .order_by(desc('total_sales'))
+        .limit(5)
+        .all()
+    )

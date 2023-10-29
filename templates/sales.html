@@ -1,7 +1,21 @@
-
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% extends "base.html" %}
-    {% block title %}Sales{% endblock %}
-  
+    <title>{% block title %}Sales{% endblock %}</title>
+    <style>
+      /* Add custom styles for the sticky button */
+      .btn-sticky {
+        position: fixed;
+        bottom: 20px; /* Adjust this value to control the distance from the bottom */
+        right: 20px; /* Adjust this value to control the distance from the right */
+        z-index: 999; /* Ensure it appears above other content */
+      }
+    </style>
+  </head>
+  <body>
     {% block content %}
 
     <h3 class="text-left">Sales Table</h3>
@@ -22,47 +36,13 @@
           <td>{{ sale.id }}</td>
           <td>{{ sale.p_id }}</td>
           <td>{{ sale.quantity }}</td>
-          <td>{{ sale.created_at }}</td>
+          <td>{{ sale.created_at}}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    <!-- add products from -->
-    <div class="container mt-4">
-      <h1>Add Sale</h1>
-      <form id="sales_form" method="post" action="/add-sale">
-        <!-- Product ID -->
-        <div class="mb-3">
-          <label for="product_id" class="form-label">Product ID</label>
-
-          <select
-            name="product_id"
-            type="number"
-            id="product_id"
-            class="form-control"
-            required
-          >
-            {% for product in products %}
-            <option value="{{ product[0] }}">{{ product[1] }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- Quantity -->
-        <div class="mb-3">
-          <label for="quantity" class="form-label">Quantity</label>
-          <input
-            type="number"
-            class="form-control"
-            id="quantity"
-            name="quantity"
-            required
-          />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Add Sale</button>
-      </form>
-    </div>
-
-    {% endblock %}
-  
+    <a href="{{ url_for('add_sale') }}" class="btn btn-primary" style="background-color: green; border: green;"
+    >Add New Sale</a
+  >    {% endblock %}
+  </body>
+</html>
