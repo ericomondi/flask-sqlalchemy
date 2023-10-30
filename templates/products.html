@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     {% extends "base.html" %}
-    <title>{% block title %}Products{% endblock %}</title>
-  </head>
-  <body>
+    {% block title %}Products{% endblock %}
+
     {% block content %}
-    
       <h3 class="text-left">Products Table</h3>
       <!-- table -->
       <table class="table table-striped" style="width: 100%" id="my_table">
@@ -90,7 +84,67 @@
           <button type="submit" class="btn btn-primary">Add Product</button>
         </form>
       </div>
-    
+
+
+    <!-- edit product -->
+    <div class="container mt-4">
+      <h1>Edit Product</h1>
+      <form id="edit-product" method="post" action="/edit-product">
+        <!-- Product ID -->
+        <div class="mb-3">
+          <label for="product_id" class="form-label">Select Product</label>
+          <select
+            name="p_id"
+            type="number"
+            id="product_id"
+            class="form-control"
+            required
+          >
+            {% for product in products %}
+            <option value="{{ product.id }}" data-price="{{ product.selling_price }}">
+              {{ product.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- Product Name -->
+        <div class="mb-3">
+          <label for="product_name" class="form-label">New Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="product_name"
+            name="p_name"
+            
+          />
+        </div>
+
+        <!-- Buying Price -->
+        <div class="mb-3">
+          <label for="buying_price" class="form-label">Buying Price</label>
+          <input
+            type="number"
+            class="form-control"
+            id="buying_price"
+            name="b_price"
+            
+          />
+        </div>
+
+        <!-- Selling Price -->
+        <div class="mb-3">
+          <label for="selling_price" class="form-label">Selling Price</label>
+          <input
+            type="number"
+            class="form-control"
+            id="selling_price"
+            name="s_price"
+           
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Edit Product</button>
+      </form>
+    </div>
     {% endblock %}
-  </body>
-</html>
+  

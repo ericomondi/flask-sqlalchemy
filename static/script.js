@@ -156,3 +156,31 @@ setTimeout(function() {
   var container = document.getElementById("flashes-container");
   container.style.display = "none";
 }, 1500); // 1500 milliseconds = 1.5 seconds
+
+
+// ----RETUTN NONE FOR AN INPUT IF EMPTY IN THE EDIP PRODUCT FORM
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get a reference to the form
+    const form = document.getElementById("edit-product");
+
+    // Add an event listener for form submission
+    form.addEventListener("submit", function (event) {
+      // Get the input fields
+      const nameInput = document.getElementById("product_name");
+      const buyingPriceInput = document.getElementById("buying_price");
+      const sellingPriceInput = document.getElementById("selling_price");
+
+      // Check if each input is empty and set it to null if it is
+      if (nameInput.value === "") {
+        nameInput.value = null;
+      }
+      if (buyingPriceInput.value === "") {
+        buyingPriceInput.value = null;
+      }
+      if (sellingPriceInput.value === "") {
+        sellingPriceInput.value = null;
+      }
+    });
+  });
+

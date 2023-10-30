@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     {% extends "base.html" %}
-    <title>{% block title %}Add Sale{% endblock %}</title>
-  </head>
-  <body>
+    {% block title %}Add Sale{% endblock %}
+
     {% block content %}
     <!-- add sale form -->
     <div class="container mt-4">
@@ -83,7 +78,5 @@
         totalAmountInput.value = totalAmount.toFixed(2);
       }
     </script>
-
     {% endblock %}
-  </body>
-</html>
+ 

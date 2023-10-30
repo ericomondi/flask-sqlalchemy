@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_required, UserMixin, login_user, current_user,logout_user
-from sqlalchemy import DateTime,desc, func
-from werkzeug.security import generate_password_hash,check_password_hash
+from flask_login import LoginManager, login_required, UserMixin, login_user, current_user, logout_user
+from sqlalchemy import DateTime, desc, func
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
 
 
@@ -10,6 +10,8 @@ app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 print("Registering user_loader function")
+
+
 @login_manager.user_loader
 def load_user(id):
     active = Users.query.get(int(id))
@@ -20,7 +22,6 @@ def load_user(id):
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:2345@localhost:5432/my_duka"
 db = SQLAlchemy(app)
 app.secret_key = b'eric'
-
 
 
 class Products(db.Model):
@@ -36,7 +37,8 @@ class Products(db.Model):
 class Sales(db.Model):
     __tablename__ = 'sales'
     id = db.Column(db.Integer, primary_key=True)
-    p_id = db.Column(db.String(255), db.ForeignKey("products.id") , nullable=False)
+    p_id = db.Column(db.String(255), db.ForeignKey(
+        "products.id"), nullable=False)
     quantity = db.Column(db.Numeric(precision=14, scale=2))
     created_at = db.Column(DateTime, default=db.func.current_timestamp())
     products = relationship("Products", back_populates="sales")
@@ -50,16 +52,14 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(255))
 
 
-
 # index route
 @app.route("/")
 def index():
     return render_template("landing.html")
 
 
-
 # get products
-@app.route("/products",methods=["GET","POST"])
+@app.route("/products", methods=["GET", "POST"])
 @login_required
 def products():
 
@@ -67,8 +67,9 @@ def products():
     products = Products.query.all()
 
     # You can now iterate over the 'products' list to access the records
-    data = [product for product in products]    
-    return render_template("products.html", products=data )
+    data = [product for product in products]
+    return render_template("products.html", products=data)
+
 
 @app.route("/add-product", methods=["POST"])
 def add_product():
@@ -78,7 +79,8 @@ def add_product():
     stock_quantity = int(request.form["stock_quantity"])
 
     # Create a new product instance with the form data
-    new_product = Products(name=product_name, buying_price=buying_price,selling_price=selling_price,stock_quantity=stock_quantity)
+    new_product = Products(name=product_name, buying_price=buying_price,
+                           selling_price=selling_price, stock_quantity=stock_quantity)
 
     # Add the new product to the database session
     db.session.add(new_product)
@@ -87,34 +89,58 @@ def add_product():
     db.session.commit()
     flash("Succesfull")
 
-    return redirect(url_for("products") )
+    return redirect(url_for("products"))
 
 
-@app.route("/add-sale", methods=["POST","GET"])
-def add_sale():
-    if request.method=="POST":
-        if "product_id" in request.form and "quantity" in request.form:
-            p_id = int(request.form["product_id"])
-            quantity = float(request.form["quantity"])
-            created_at = "now()"
-            new_sale=Sales(quantity=quantity,p_id=p_id,created_at=created_at)
-            db.session.add(new_sale)
-            db.session.commit()
-            return redirect(url_for("add_sale"))
-        else:
-            flash("Make sure all inputs are captured")
+# @app.route('/edit-product', methods=['POST'])
+# def edit_product():
+#     id = request.form['p_id']
+#     row = Products.query.filter_by(id=id).one()
 
-    products = Products.query.all()
-    data = [product for product in products] 
+#     # Get the values from the form
+#     name = request.form.get('p_name')
+#     buying_price = request.form.get('b_price')
+#     selling_price = request.form.get('s_price')
 
-    return render_template("add-sale.html", products=data)
-    
+#     # Check and handle empty values
+#     if name is not None:
+#         row.name = name
+#     if buying_price is not None:
+#         row.buying_price = buying_price
+#     if selling_price is not None:
+#         row.selling_price = selling_price
+
+#     db.session.commit()
+
+#     return redirect(url_for('products'))
+
+
+
+
+
+@app.route('/edit-product',methods=['POST'])
+def edit_product():
+
+    id = request.form['p_id']
+    row = Products.query.filter_by(id = id).one()
+    row.name = request.form['p_name']
+    row.buying_price = request.form['b_price']
+    row.selling_price = request.form['s_price']
+      
+    # db.session.merge(row)   
+    db.session.commit()
+
+    return redirect(url_for('products'))
+
+
+
+
 
 # get sales
-@app.route("/sales",methods=["GET"])
+@app.route("/sales", methods=["GET"])
 @login_required
 def sales():
-    
+
     print("User ID in the session (sales route):", session.get('user_id'))
 
     user = current_user
@@ -123,11 +149,30 @@ def sales():
     print("Current User:", user)
 
     # You can now iterate over the 'sales' list to access the records
-    data = [sale for sale in sales]    
+    data = [sale for sale in sales]
     print(data)
     return render_template("sales.html", sales=data, user=user)
 
 
+@app.route("/add-sale", methods=["POST", "GET"])
+def add_sale():
+    if request.method == "POST":
+        if "product_id" in request.form and "quantity" in request.form:
+            p_id = int(request.form["product_id"])
+            quantity = float(request.form["quantity"])
+            created_at = "now()"
+            new_sale = Sales(quantity=quantity, p_id=p_id,
+                             created_at=created_at)
+            db.session.add(new_sale)
+            db.session.commit()
+            return redirect(url_for("add_sale"))
+        else:
+            flash("Make sure all inputs are captured")
+
+    products = Products.query.all()
+    data = [product for product in products]
+
+    return render_template("add-sale.html", products=data)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -136,7 +181,7 @@ def register():
         full_name = request.form['full_name']
         password = request.form['password']
         email = request.form['email']
-        hashed_pass=generate_password_hash(password)
+        hashed_pass = generate_password_hash(password)
         # Email Validation
         user = Users.query.filter_by(email=email).first()
         if user:
@@ -144,7 +189,8 @@ def register():
         elif not password or not email:
             flash("Please fill all the inputs")
         else:
-            new_user = Users(full_name=full_name, email=email, password=hashed_pass)
+            new_user = Users(full_name=full_name, email=email,
+                             password=hashed_pass)
             db.session.add(new_user)
             db.session.commit()
             flash("You have registered successfully!")
@@ -160,7 +206,8 @@ def login():
         password = request.form['password']
         user = Users.query.filter_by(email=email).first()
         print("User to be verify:", user)
-        remember = True if request.form.get('remember-me') else False #ternary cex
+        remember = True if request.form.get(
+            'remember-me') else False  # ternary cex
         if remember:
             print("remember checked")
 
@@ -170,7 +217,7 @@ def login():
             login_user(user)
             session["user_id"] = user.id
             flash("Logged in successfully!")
-            active_user=current_user
+            active_user = current_user
             print("current user(login):", active_user)
             return redirect(url_for("dashboard"))
         else:
@@ -179,26 +226,24 @@ def login():
     return render_template("login.html")
 
 
-
 @app.route("/dashboard")
 def dashboard():
     # Query to get the top five sales by the sum of (quantity * selling_price) in descending order
     top_sales = (
-        Sales.query.with_entities(Products.name, func.sum(Sales.quantity * Products.selling_price).label('total_sales'))
+        Sales.query.with_entities(Products.name, func.sum(
+            Sales.quantity * Products.selling_price).label('total_sales'))
         .join(Products)
         .group_by(Products.name)
         .order_by(desc('total_sales'))
         .limit(5)
-        
+
     )
 
-    p_names=[name[0] for name in top_sales]
-    p_sales=[sale[1] for sale in top_sales]
+    p_names = [name[0] for name in top_sales]
+    p_sales = [sale[1] for sale in top_sales]
     print(top_sales)
-    
+
     return render_template("dashboard.html", p_names=p_names, p_sales=p_sales)
-
-
 
 
 @app.route("/logout")
@@ -210,4 +255,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
