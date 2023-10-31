@@ -245,6 +245,11 @@ def dashboard():
 
     return render_template("dashboard.html", p_names=p_names, p_sales=p_sales)
 
+# Define a custom error handler for 404 Not Found
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
 
 @app.route("/logout")
 def logout():
