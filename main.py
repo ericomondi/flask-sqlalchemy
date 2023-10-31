@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
+
 print("Registering user_loader function")
 
 
