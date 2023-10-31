@@ -215,7 +215,6 @@ def login():
             # Successfully logged in, store user info in the session
             print("User authenticated:", user)
             login_user(user)
-            session["user_id"] = user.id
             flash("Logged in successfully!")
             active_user = current_user
             print("current user(login):", active_user)
@@ -249,7 +248,6 @@ def dashboard():
 @app.route("/logout")
 def logout():
     logout_user()
-    session.pop("user_id", None)
     flash("Logged out successfully")
     return redirect(url_for("login"))
 
