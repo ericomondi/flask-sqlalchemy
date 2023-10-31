@@ -80,9 +80,10 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul
+<!--             <ul
               class="navbar-nav {% if 'user_id' in session %}user-logged-in{% endif %}"
-            >
+            > -->
+              <ul class="navbar-nav {% if not current_user.is_anonymous %}user-logged-in{% endif %}">
               <li class="nav-item">
                 <a
                   class="nav-link active"
@@ -107,7 +108,8 @@
               <li class="nav-item nav-link-login">
                 <a class="nav-link" href="{{ url_for('login') }}">Login</a>
               </li>
-              <li class="nav-item dropdown {% if 'user_id' not in session %}user-logged-out{% endif %}">
+<!--               <li class="nav-item dropdown {% if 'user_id' not in session %}user-logged-out{% endif %}"> -->
+                <li class="nav-item dropdown {% if current_user.is_anonymous %}user-logged-out{% endif %}">
                 <a
                   class="nav-link dropdown-toggle"
                   href="#"
