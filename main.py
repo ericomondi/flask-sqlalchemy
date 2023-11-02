@@ -7,12 +7,10 @@ from sqlalchemy.orm import relationship
 
 
 app = Flask(__name__)
+
+
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
-
-print("Registering user_loader function")
-
-
 @login_manager.user_loader
 def load_user(id):
     active = Users.query.get(int(id))
@@ -128,7 +126,6 @@ def edit_product():
     row.buying_price = request.form['b_price']
     row.selling_price = request.form['s_price']
       
-    # db.session.merge(row)   
     db.session.commit()
 
     return redirect(url_for('products'))
@@ -212,17 +209,20 @@ def login():
         if remember:
             print("remember checked")
 
-        if user and check_password_hash(user.password, password):
-            # Successfully logged in, store user info in the session
-            print("User authenticated:", user)
-            login_user(user)
-            flash("Logged in successfully!")
-            active_user = current_user
-            print("current user(login):", active_user)
-            return redirect(url_for("dashboard"))
+        if user:
+            if check_password_hash(user.password, password):
+                # Successfully logged in, store user info in the session
+                print("User authenticated:", user)
+                login_user(user)
+                flash("Logged in successfully!")
+                active_user = current_user
+                print("current user(login):", active_user)
+                return redirect(url_for("dashboard"))
+            else:
+                flash("Invalid email or password")
         else:
-            flash("Invalid email or password")
-
+            flash("User doesnt exist please register")
+        
     return render_template("login.html")
 
 
